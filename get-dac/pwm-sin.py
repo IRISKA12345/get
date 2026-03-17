@@ -1,45 +1,18 @@
 import pwm_dac
+import signal_generator as sg
 import time
-import math
 
-FREQUENCY = 1  
-AMPLITUDE = 2.5 
-OFFSET = 2.5 
-SAMPLE_RATE = 100 
+amplitude = 3.2
+signal_frequency = 10
+sampling_frequency = 1000
 
-def main():
-    dac = None
-    try:
-
-        dac = pwm_dac.PWM_DAC(12, 500, 5.0, False)
-        
-        start_time = time.time()
-        sample_interval = 1.0 / SAMPLE_RATE
-        
-        print("Генерация sin(t)...")
-        print(f"Частота: {FREQUENCY} Гц")
-        
-        sample_num = 0
-        while True:
-            t = sample_num / SAMPLE_RATE
-            
-            sine_value = math.sin(2 * math.pi * FREQUENCY * t)
-            
-            voltage = OFFSET + AMPLITUDE * sine_value
-            voltage = max(0, min(5.0, voltage))
-            
-            dac.set_voltage(voltage)
-            
-            sample_num += 1
-            
-            time.sleep(sample_interval)
-    
-    except KeyboardInterrupt:
-        print("Остановка генерации...")
-    
-    finally:
-        if dac is not None:
-            dac.deinit()
-
-if name == "main":
-    main()
+try:
+    dac = pwm_dac.PWM_DAC(12, 500, 3.290, True)
+    start_time = time.time()
+    while True:
+        current_time = time.time() - start_time
+        signal = amplitude * sg.get_sin_wave_amplitude(signal_frequency, current_time)
+        dac.set_voltage(signal)
+        sg.wait_for_sampling_period(sampling_frequency)
+finally:
+    dac.deinit()
